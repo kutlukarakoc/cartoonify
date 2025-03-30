@@ -1,62 +1,38 @@
-import '~/global.css';
+import "~/global.css";
 
-import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import * as React from 'react';
-import { Platform } from 'react-native';
-import { NAV_THEME } from '~/lib/constants';
-import { useColorScheme } from '~/lib/useColorScheme';
-import { PortalHost } from '@rn-primitives/portal';
-import { ThemeToggle } from '~/components/ThemeToggle';
-import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
+import { DarkTheme, Theme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as React from "react";
+import { PortalHost } from "@rn-primitives/portal";
 
-const LIGHT_THEME: Theme = {
-  ...DefaultTheme,
-  colors: NAV_THEME.light,
-};
 const DARK_THEME: Theme = {
   ...DarkTheme,
-  colors: NAV_THEME.dark,
+  colors: {
+    background: "hsl(240 10% 3.9%)", // background
+    border: "hsl(240 3.7% 15.9%)", // border
+    card: "hsl(240 10% 3.9%)", // card
+    notification: "hsl(0 72% 51%)", // destructive
+    primary: "hsl(0 0% 98%)", // primary
+    text: "hsl(0 0% 98%)", // foreground
+  },
 };
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from 'expo-router';
+} from "expo-router";
 
 export default function RootLayout() {
-  const hasMounted = React.useRef(false);
-  const { colorScheme, isDarkColorScheme } = useColorScheme();
-  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-
-  useIsomorphicLayoutEffect(() => {
-    if (hasMounted.current) {
-      return;
-    }
-
-    if (Platform.OS === 'web') {
-      // Adds the background color to the html element to prevent white background on overscroll.
-      document.documentElement.classList.add('bg-background');
-    }
-    setAndroidNavigationBar(colorScheme);
-    setIsColorSchemeLoaded(true);
-    hasMounted.current = true;
-  }, []);
-
-  if (!isColorSchemeLoaded) {
-    return null;
-  }
-
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+    <ThemeProvider value={DARK_THEME}>
+      <StatusBar style="dark" />
       <Stack>
         <Stack.Screen
-          name='index'
+          name="index"
           options={{
-            title: 'Starter Base',
-            headerRight: () => <ThemeToggle />,
+            title: "Cartoonify",
+            
           }}
         />
       </Stack>
@@ -64,6 +40,3 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
-
-const useIsomorphicLayoutEffect =
-  Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;

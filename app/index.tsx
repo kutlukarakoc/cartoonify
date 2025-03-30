@@ -1,95 +1,173 @@
-import * as React from 'react';
-import { View } from 'react-native';
-import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
-import { Info } from '~/lib/icons/Info';
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
-import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
-import { Progress } from '~/components/ui/progress';
-import { Text } from '~/components/ui/text';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
-
-const GITHUB_AVATAR_URI =
-  'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
+import { useState } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { View, Image } from "react-native";
+import { Button } from "~/components/ui/button";
+import { Text } from "~/components/ui/text";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Upload } from "~/lib/icons/Upload";
+import { Camera } from "~/lib/icons/Camera";
+import { Download } from "~/lib/icons/Download";
+import { LoaderPinwheel } from "~/lib/icons/Loader";
+import * as ImagePicker from "expo-image-picker";
+import { Skeleton } from "~/components/ui/skeleton";
+import { useCameraPermissions } from "expo-camera";
+import { NoImageSelected } from "~/components/NoImageSelected";
+import { CardWrapper } from "~/components/CardWrapper";
 
 export default function Screen() {
-  const [progress, setProgress] = React.useState(78);
+  const [activeTab, setActiveTab] = useState("original");
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [cartoonImage, setCartoonImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  function updateProgressValue() {
-    setProgress(Math.floor(Math.random() * 100));
+  const [permission, requestPermission] = useCameraPermissions();
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setOriginalImage(result.assets[0].uri);
+
+      const cartoonImage = await cartoonifyImage(result.assets[0].uri);
+      setCartoonImage(cartoonImage);
+    }
+  };
+
+  const takePhoto = async () => {
+    if (permission?.granted) {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setOriginalImage(result.assets[0].uri);
+        const cartoonImage = await cartoonifyImage(result.assets[0].uri);
+        setCartoonImage(cartoonImage);
+      }
+    } else {
+      const { status } = await requestPermission();
+      if (status === "granted") {
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ["images"],
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 1,
+        });
+        if (!result.canceled) {
+          setOriginalImage(result.assets[0].uri);
+          const cartoonImage = await cartoonifyImage(result.assets[0].uri);
+          setCartoonImage(cartoonImage);
+        }
+      } else {
+        alert("Camera permission is required to take a photo.");
+      }
+    }
+  };
+
+  async function cartoonifyImage(imageData: string): Promise<string> {
+    setIsProcessing(true);
+    setActiveTab("cartoon");
+    // Simulate processing delay
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+
+    // this would return the processed image from an AI service
+    // For demo purposes, just returning the original image
+    setIsProcessing(false);
+    return imageData;
   }
+
   return (
-    <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
-      <Card className='w-full max-w-sm p-6 rounded-2xl'>
-        <CardHeader className='items-center'>
-          <Avatar alt="Rick Sanchez's Avatar" className='w-24 h-24'>
-            <AvatarImage source={{ uri: GITHUB_AVATAR_URI }} />
-            <AvatarFallback>
-              <Text>RS</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View className='p-3' />
-          <CardTitle className='pb-2 text-center'>Rick Sanchez</CardTitle>
-          <View className='flex-row'>
-            <CardDescription className='text-base font-semibold'>Scientist</CardDescription>
-            <Tooltip delayDuration={150}>
-              <TooltipTrigger className='px-2 pb-0.5 active:opacity-50'>
-                <Info size={14} strokeWidth={2.5} className='w-4 h-4 text-foreground/70' />
-              </TooltipTrigger>
-              <TooltipContent className='py-2 px-4 shadow'>
-                <Text className='native:text-lg'>Freelance</Text>
-              </TooltipContent>
-            </Tooltip>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <View className='flex-row justify-around gap-3'>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Dimension</Text>
-              <Text className='text-xl font-semibold'>C-137</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Age</Text>
-              <Text className='text-xl font-semibold'>70</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Species</Text>
-              <Text className='text-xl font-semibold'>Human</Text>
-            </View>
-          </View>
-        </CardContent>
-        <CardFooter className='flex-col gap-3 pb-0'>
-          <View className='flex-row items-center overflow-hidden'>
-            <Text className='text-sm text-muted-foreground'>Productivity:</Text>
-            <LayoutAnimationConfig skipEntering>
-              <Animated.View
-                key={progress}
-                entering={FadeInUp}
-                exiting={FadeOutDown}
-                className='w-11 items-center'
-              >
-                <Text className='text-sm font-bold text-sky-600'>{progress}%</Text>
-              </Animated.View>
-            </LayoutAnimationConfig>
-          </View>
-          <Progress value={progress} className='h-2' indicatorClassName='bg-sky-600' />
-          <View />
+    <SafeAreaProvider>
+      <View className="flex-1 items-center p-6 bg-secondary/30">
+        <View className="flex-row justify-between w-screen px-3">
           <Button
-            variant='outline'
-            className='shadow shadow-foreground/5'
-            onPress={updateProgressValue}
+            variant="outline"
+            className="bg-purple-700 flex-row items-center gap-2 active:bg-purple-800"
+            onPress={pickImage}
           >
-            <Text>Update</Text>
+            <Upload size={16} className="text-primary" />
+            <Text className="text-primary">Select Image</Text>
           </Button>
-        </CardFooter>
-      </Card>
-    </View>
+
+          <Button
+            variant="outline"
+            className="bg-purple-700 active:bg-purple-800 flex-row items-center gap-2"
+            onPress={takePhoto}
+          >
+            <Camera size={16} className="text-primary" />
+            <Text className="text-primary">Take a Photo</Text>
+          </Button>
+        </View>
+
+        <View className="justify-center p-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full max-w-[400px] mx-auto flex-col gap-1.5"
+          >
+            <TabsList className="flex-row w-full mb-3">
+              <TabsTrigger value="original" className="flex-1">
+                <Text>Original</Text>
+              </TabsTrigger>
+              <TabsTrigger
+                value="cartoon"
+                className="flex-1"
+                disabled={!originalImage}
+              >
+                <Text>Cartoon</Text>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="original">
+              <CardWrapper>
+                {originalImage ? (
+                  <Image
+                    source={{ uri: originalImage }}
+                    className="w-full h-full rounded-md"
+                  />
+                ) : (
+                  <NoImageSelected />
+                )}
+              </CardWrapper>
+            </TabsContent>
+            <TabsContent value="cartoon">
+              <CardWrapper>
+                {!cartoonImage || isProcessing ? (
+                  <Skeleton className="h-full w-full rounded-md" />
+                ) : (
+                  <Image
+                    source={{ uri: cartoonImage }}
+                    className="w-full h-full rounded-md"
+                  />
+                )}
+              </CardWrapper>
+            </TabsContent>
+          </Tabs>
+
+          <Button
+            variant="outline"
+            className="bg-purple-700 active:bg-purple-800 flex-row items-center gap-2 -mt-20"
+            onPress={pickImage}
+            disabled={!cartoonImage}
+          >
+            {isProcessing ? (
+              <LoaderPinwheel size={24} className="text-primary animate-spin" />
+            ) : (
+              <>
+                <Download size={16} className="text-primary" />
+                <Text className="text-primary">Save Cartoon</Text>
+              </>
+            )}
+          </Button>
+        </View>
+      </View>
+    </SafeAreaProvider>
   );
 }

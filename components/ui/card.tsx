@@ -8,7 +8,7 @@ const Card = React.forwardRef<ViewRef, ViewProps>(({ className, ...props }, ref)
   <View
     ref={ref}
     className={cn(
-      'rounded-lg border border-border bg-card shadow-sm shadow-foreground/10',
+      'rounded-lg border border-purple-700/50 bg-card shadow-sm shadow-purple-700/50',
       className
     )}
     {...props}
@@ -44,7 +44,7 @@ CardDescription.displayName = 'CardDescription';
 
 const CardContent = React.forwardRef<ViewRef, ViewProps>(({ className, ...props }, ref) => (
   <TextClassContext.Provider value='text-card-foreground'>
-    <View ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+    <View ref={ref} className={cn('p-2', className)} {...props} />
   </TextClassContext.Provider>
 ));
 CardContent.displayName = 'CardContent';
