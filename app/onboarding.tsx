@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Ghibli tarzı örnek görsellerimiz
 const sampleImages = [
   require('../assets/images/ob-1.jpeg'),
   require('../assets/images/ob-2.jpeg'),
@@ -46,15 +45,15 @@ export default function OnboardingScreen() {
         </View>
 
         <View className="items-center px-5 my-5">
-          <Text className="text-4xl font-bold text-white mb-4">Ghibli Style</Text>
+          <Text className="text-4xl font-bold text-white mb-4">Cartoon Style</Text>
           
           <Text className="text-2xl text-[#cccccc] text-center mb-3">
             Transforms photos into{' '}
-            <Text className="text-[#b861ff] font-semibold">Ghibli Style-inspired characters</Text>
+            <Text className="text-[#b861ff] font-semibold">Cartoon Style-inspired characters</Text>
           </Text>
           
           <Text className="text-lg text-[#aaaaaa] text-center mt-2 px-2.5">
-            Create your own Ghibli-style anime characters 
+            Create your own cartoon-style anime characters 
             using our AI-powered transformation tool
           </Text>
         </View>
