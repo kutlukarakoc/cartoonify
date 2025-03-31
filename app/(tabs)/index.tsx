@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { View, Image } from "react-native";
+import { View, Image, Alert } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -14,6 +14,9 @@ import { useCameraPermissions } from "expo-camera";
 import { NoImageSelected } from "~/components/NoImageSelected";
 import { CardWrapper } from "~/components/CardWrapper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import { Fragment } from "react";
 
 export default function ConvertScreen() {
   const [activeTab, setActiveTab] = useState("original");
@@ -107,47 +110,99 @@ export default function ConvertScreen() {
     setCartoonImage(imageData);
     setIsProcessing(false);
     
-    // Save to history
-    await saveToHistory(originalImage, imageData);
+    // Burada originalImage state'i yerine doğrudan URI kullanıyoruz
+    const originalUri = `data:image/png;base64,${base64}`;
+    console.log("Saving to history with original and cartoon images");
+    await saveToHistory(originalUri, imageData);
     
     return imageData;
   }
   
   // Save images to AsyncStorage history
-  const saveToHistory = async (original: string | null, cartoon: string) => {
-    if (!original) return;
-    
+  const saveToHistory = async (original: string, cartoon: string) => {
     try {
-      // Get existing history
+      console.log("History save started");
+      // AsyncStorage'dan mevcut verileri oku
       const historyJson = await AsyncStorage.getItem('conversion_history');
+      console.log("Current history data:", historyJson ? "Found existing data" : "No existing data");
+      
+      // JSON parse işlemi
       const history = historyJson ? JSON.parse(historyJson) : [];
-
-      // Add new conversion to history
+      console.log(`Current history has ${history.length} items`);
+      
+      // Yeni öğe oluştur
       const newItem = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
         original,
         cartoon
       };
-
-      // Add to beginning of array to show newest first
+      
+      // Yeni öğeyi array'in başına ekle
       const updatedHistory = [newItem, ...history];
+      console.log(`Updated history now has ${updatedHistory.length} items`);
       
       // Limit history to 20 items to prevent storage issues
       const limitedHistory = updatedHistory.slice(0, 20);
       
-      // Save back to AsyncStorage
-      await AsyncStorage.setItem('conversion_history', JSON.stringify(limitedHistory));
+      // AsyncStorage'a kaydet
+      const jsonValue = JSON.stringify(limitedHistory);
+      console.log(`Saving JSON data of length: ${jsonValue.length}`);
+      await AsyncStorage.setItem('conversion_history', jsonValue);
+      console.log("History saved successfully");
+      
+      // Kaydetme işlemini doğrula
+      const verifyData = await AsyncStorage.getItem('conversion_history');
+      console.log(`Verification: Data exists after save: ${!!verifyData}`);
+      if (verifyData) {
+        const parsedData = JSON.parse(verifyData);
+        console.log(`Verification: Saved ${parsedData.length} items`);
+      }
     } catch (error) {
       console.error('Error saving to history:', error);
     }
   };
 
-  const saveCartoonImage = async () => {
+  const saveImageToGallery = async () => {
     if (cartoonImage) {
-      // Here you would typically use expo-file-system to save the image
-      // For now just simulate success
-      alert('Image saved successfully!');
+      try {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        
+        if (status !== 'granted') {
+          Alert.alert(
+            "Permission needed", 
+            "Please grant permission to save images to your gallery",
+            [{ text: "OK" }]
+          );
+          return;
+        }
+
+        const base64Data = cartoonImage.split(',')[1];
+        
+        const fileUri = FileSystem.documentDirectory + `cartoon_${Date.now()}.png`;
+        
+        // Base64 veriyi dosyaya yazalım
+        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        // Dosyayı medya kütüphanesine kaydedelim
+        await MediaLibrary.createAssetAsync(fileUri);
+        
+        // Kullanıcıya başarı mesajı gösterelim
+        Alert.alert(
+          "Success", 
+          "Image saved to your gallery successfully!",
+          [{ text: "OK" }]
+        );
+      } catch (error) {
+        console.error('Error saving to gallery:', error);
+        Alert.alert(
+          "Error", 
+          "Failed to save image to gallery",
+          [{ text: "OK" }]
+        );
+      }
     }
   };
 
@@ -221,16 +276,16 @@ export default function ConvertScreen() {
           <Button
             variant="outline"
             className="bg-purple-700 active:bg-purple-800 flex-row items-center gap-2 -mt-20"
-            onPress={saveCartoonImage}
+            onPress={saveImageToGallery}
             disabled={!cartoonImage || isProcessing}
           >
             {isProcessing ? (
               <LoaderPinwheel size={24} color="#fff" className="text-primary animate-spin" />
             ) : (
-              <>
+              <Fragment>
                 <Download size={16} className="text-primary" />
                 <Text className="text-primary">Save Cartoon</Text>
-              </>
+              </Fragment>
             )}
           </Button>
         </View>

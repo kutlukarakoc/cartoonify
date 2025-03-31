@@ -5,6 +5,7 @@ import { ImagePlus, Clock } from 'lucide-react-native';
 export default function TabsLayout() {
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         tabBarActiveTintColor: '#fff',
         tabBarInactiveTintColor: '#9ca3af',
@@ -22,6 +23,7 @@ export default function TabsLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        lazy: false,
       }}
     >
       <Tabs.Screen
@@ -37,11 +39,11 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'Cartoonify',
+          title: 'History',
           tabBarIcon: ({ color, size }) => (
             <Clock size={size} color={color} />
           ),
-          headerTitle: 'Cartoonify',
+          headerTitle: 'Conversion History',
         }}
       />
     </Tabs>

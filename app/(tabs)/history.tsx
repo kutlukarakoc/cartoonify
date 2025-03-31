@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, RefreshControl, BackHandler } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format, parseISO } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Trash2 } from 'lucide-react-native';
+import { Trash2, RefreshCw } from 'lucide-react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 type ConversionItem = {
   id: string;
@@ -14,41 +15,167 @@ type ConversionItem = {
 
 export default function HistoryScreen() {
   const [historyItems, setHistoryItems] = useState<ConversionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  
+  // Veri yükleme işlemi devam ediyor mu?
+  const isLoadingRef = useRef(false);
+  const isMounted = useRef(false);
+  const navigation = useNavigation();
 
+  // Component mount olduğunda
   useEffect(() => {
-    loadHistory();
+    isMounted.current = true;
+    
+    // Sayfa ilk yüklendiğinde veri yükle
+    if (!dataLoaded) {
+      initialLoadHistory();
+    }
+    
+    // Back tuşuna basılırsa convert ekranına yönlendir
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    });
+    
+    return () => {
+      isMounted.current = false;
+      backHandler.remove();
+    };
   }, []);
-
-  const loadHistory = async () => {
+  
+  // İlk veri yükleme işlemi
+  const initialLoadHistory = async () => {
+    if (isLoadingRef.current || !isMounted.current) return;
+    
     try {
-      setIsLoading(true);
+      isLoadingRef.current = true;
+      
+      console.log("Initial loading history data...");
+      
+      // Veriyi yükle
       const historyJson = await AsyncStorage.getItem('conversion_history');
+      
+      if (!isMounted.current) return;
+      
       if (historyJson) {
-        const history = JSON.parse(historyJson) as ConversionItem[];
-        setHistoryItems(history);
+        try {
+          const history = JSON.parse(historyJson) as ConversionItem[];
+          console.log(`Initial loaded ${history.length} history items`);
+          setHistoryItems(history);
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError);
+          setHistoryItems([]);
+        }
+      } else {
+        console.log("No history data found");
+        setHistoryItems([]);
       }
     } catch (error) {
       console.error('Error loading history:', error);
+      if (isMounted.current) {
+        setHistoryItems([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setDataLoaded(true);
+        isLoadingRef.current = false;
+        setIsLoading(false);
+        console.log("Initial history loading completed");
+      }
     }
   };
+  
+  // Normal yenileme işlemi için
+  const loadHistory = useCallback(async () => {
+    if (isLoadingRef.current || !isMounted.current) return;
+    
+    try {
+      isLoadingRef.current = true;
+      setIsLoading(true);
+      
+      console.log("Loading history data (refresh)...");
+      
+      // AsyncStorage'dan veriyi çek
+      const historyJson = await AsyncStorage.getItem('conversion_history');
+      
+      if (!isMounted.current) return;
+      
+      if (historyJson) {
+        try {
+          // JSON parse işlemi
+          const history = JSON.parse(historyJson) as ConversionItem[];
+          console.log(`Loaded ${history.length} history items`);
+          setHistoryItems(history);
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError);
+          setHistoryItems([]);
+        }
+      } else {
+        console.log("No history data found");
+        setHistoryItems([]);
+      }
+    } catch (error) {
+      console.error('Error loading history:', error);
+      if (isMounted.current) {
+        setHistoryItems([]);
+      }
+    } finally {
+      if (isMounted.current) {
+        isLoadingRef.current = false;
+        setIsLoading(false);
+        setRefreshing(false);
+        console.log("History loading completed");
+      }
+    }
+  }, []);
+
+  // Ekran her görünür olduğunda verileri yenileyelim
+  useFocusEffect(
+    useCallback(() => {
+      console.log("History screen is now focused");
+      
+      // Veri daha önce yüklendiyse, sadece güncelleme yap
+      if (dataLoaded) {
+        loadHistory();
+      }
+      
+      return () => {
+        console.log("History screen lost focus");
+      };
+    }, [loadHistory, dataLoaded])
+  );
+
+  const onRefresh = useCallback(() => {
+    if (isLoadingRef.current) return;
+    setRefreshing(true);
+    loadHistory();
+  }, [loadHistory]);
 
   const clearHistory = async () => {
+    if (isLoadingRef.current) return;
+    
     try {
       await AsyncStorage.removeItem('conversion_history');
       setHistoryItems([]);
+      console.log("History cleared");
     } catch (error) {
       console.error('Error clearing history:', error);
     }
   };
 
   const removeHistoryItem = async (id: string) => {
+    if (isLoadingRef.current) return;
+    
     try {
       const updatedItems = historyItems.filter(item => item.id !== id);
       setHistoryItems(updatedItems);
       await AsyncStorage.setItem('conversion_history', JSON.stringify(updatedItems));
+      console.log(`Removed item ${id}`);
     } catch (error) {
       console.error('Error removing item:', error);
     }
@@ -83,22 +210,45 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {historyItems.length > 0 ? (
-        <>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Your Conversions</Text>
-            <TouchableOpacity onPress={clearHistory} style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>Clear All</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Your Conversions</Text>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            onPress={onRefresh} 
+            style={styles.refreshButton}
+            disabled={isLoading || refreshing}
+          >
+            <RefreshCw size={18} color={isLoading || refreshing ? "#666" : "#6a0dad"} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={clearHistory} 
+            style={styles.clearButton}
+            disabled={isLoading || historyItems.length === 0}
+          >
+            <Text style={[
+              styles.clearButtonText, 
+              (isLoading || historyItems.length === 0) && {color: '#666'}
+            ]}>
+              Clear All
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-          <FlatList
-            data={historyItems}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-          />
-        </>
+      {isLoading ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Loading...</Text>
+        </View>
+      ) : historyItems.length > 0 ? (
+        <FlatList
+          data={historyItems}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#6a0dad"]} />
+          }
+        />
       ) : (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No conversions yet</Text>
@@ -127,6 +277,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  refreshButton: {
+    padding: 8,
+    marginRight: 8,
   },
   clearButton: {
     padding: 8,

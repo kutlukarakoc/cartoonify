@@ -30,50 +30,85 @@ export {
 // Define a key for onboarding state
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
+// Bu fonksiyon gerekli verileri önceden yükler
+async function preloadData() {
+  try {
+    // History verilerini önceden yükle
+    const historyJson = await AsyncStorage.getItem('conversion_history');
+    console.log("Preloaded history data:", historyJson ? "Found" : "Not found");
+    
+    // Onboarding durumunu kontrol et
+    const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
+    console.log("Onboarding status:", onboardingComplete === 'true' ? "Completed" : "Not completed");
+    
+    return true;
+  } catch (error) {
+    console.error("Error preloading data:", error);
+    return true; // Hata olsa bile devam et
+  }
+}
+
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
-
+  
   useEffect(() => {
     async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      setIsReady(true);
-      await SplashScreen.hideAsync();
+      try {
+        // Splash ekranını göster
+        await SplashScreen.preventAutoHideAsync();
+        
+        // Tüm verileri önceden yükle
+        await preloadData();
+        
+        // 2 saniye bekle - hem splash görünsün hem veriler yüklensin
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.error("Error preparing app:", error);
+      } finally {
+        // Uygulama hazır
+        setIsReady(true);
+        // Splash ekranını gizle
+        await SplashScreen.hideAsync();
+      }
     }
+    
     prepare();
   }, []);
 
   useEffect(() => {
-    // Check if onboarding was completed
-    const checkOnboarding = async () => {
-      try {
-        const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-        
-        // After a small delay to show splash screen, redirect to the proper screen
-        setTimeout(() => {
-          // If onboarding was completed, go to (tabs), else go to onboarding
+    // Uygulama hazır olduğunda çalışır
+    if (isReady) {
+      // Onboarding durumunu kontrol et
+      const checkOnboarding = async () => {
+        try {
+          const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
+          
+          // Onboarding tamamlandıysa tabslara git, değilse onboarding'e
           if (onboardingComplete === 'true') {
             router.replace('/(tabs)');
           } else {
-            // If there's an onboarding flow, uncomment this line
-            // router.replace('/onboarding');
-            
-            // For now, just go to tabs and mark onboarding as complete
+            // Onboarding yok, direkt tabslara git ve onboarding tamamlandı olarak işaretle
             AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
             router.replace('/(tabs)');
           }
-        }, 2000);
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
-        // Default to tabs on error
-        router.replace('/(tabs)');
-      }
-    };
+        } catch (error) {
+          console.error('Error checking onboarding status:', error);
+          // Hata durumunda tabs'a git
+          router.replace('/(tabs)');
+        }
+      };
 
-    checkOnboarding();
-  }, []);
+      checkOnboarding();
+    }
+  }, [isReady]);
 
   if (!isReady) {
-    return <SplashScreenComponent />;
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <SplashScreenComponent />
+      </SafeAreaProvider>
+    );
   }
 
   return (
