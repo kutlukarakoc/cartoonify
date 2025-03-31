@@ -32,10 +32,8 @@ const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 async function preloadData() {
   try {
     const historyJson = await AsyncStorage.getItem('conversion_history');
-    console.log("Preloaded history data:", historyJson ? "Found" : "Not found");
     
     const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-    console.log("Onboarding status:", onboardingComplete === 'true' ? "Completed" : "Not completed");
     
     return true;
   } catch (error) {

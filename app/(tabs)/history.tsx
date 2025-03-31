@@ -19,21 +19,17 @@ export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   
-  // Veri yükleme işlemi devam ediyor mu?
   const isLoadingRef = useRef(false);
   const isMounted = useRef(false);
   const navigation = useNavigation();
 
-  // Component mount olduğunda
   useEffect(() => {
     isMounted.current = true;
     
-    // Sayfa ilk yüklendiğinde veri yükle
     if (!dataLoaded) {
       initialLoadHistory();
     }
     
-    // Back tuşuna basılırsa convert ekranına yönlendir
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (navigation.canGoBack()) {
         navigation.goBack();
@@ -48,16 +44,12 @@ export default function HistoryScreen() {
     };
   }, []);
   
-  // İlk veri yükleme işlemi
   const initialLoadHistory = async () => {
     if (isLoadingRef.current || !isMounted.current) return;
     
     try {
       isLoadingRef.current = true;
       
-      console.log("Initial loading history data...");
-      
-      // Veriyi yükle
       const historyJson = await AsyncStorage.getItem('conversion_history');
       
       if (!isMounted.current) return;
@@ -65,14 +57,12 @@ export default function HistoryScreen() {
       if (historyJson) {
         try {
           const history = JSON.parse(historyJson) as ConversionItem[];
-          console.log(`Initial loaded ${history.length} history items`);
           setHistoryItems(history);
         } catch (parseError) {
           console.error("JSON parse error:", parseError);
           setHistoryItems([]);
         }
       } else {
-        console.log("No history data found");
         setHistoryItems([]);
       }
     } catch (error) {
@@ -85,12 +75,10 @@ export default function HistoryScreen() {
         setDataLoaded(true);
         isLoadingRef.current = false;
         setIsLoading(false);
-        console.log("Initial history loading completed");
       }
     }
   };
   
-  // Normal yenileme işlemi için
   const loadHistory = useCallback(async () => {
     if (isLoadingRef.current || !isMounted.current) return;
     
@@ -98,25 +86,19 @@ export default function HistoryScreen() {
       isLoadingRef.current = true;
       setIsLoading(true);
       
-      console.log("Loading history data (refresh)...");
-      
-      // AsyncStorage'dan veriyi çek
       const historyJson = await AsyncStorage.getItem('conversion_history');
       
       if (!isMounted.current) return;
       
       if (historyJson) {
         try {
-          // JSON parse işlemi
           const history = JSON.parse(historyJson) as ConversionItem[];
-          console.log(`Loaded ${history.length} history items`);
           setHistoryItems(history);
         } catch (parseError) {
           console.error("JSON parse error:", parseError);
           setHistoryItems([]);
         }
       } else {
-        console.log("No history data found");
         setHistoryItems([]);
       }
     } catch (error) {
@@ -129,24 +111,15 @@ export default function HistoryScreen() {
         isLoadingRef.current = false;
         setIsLoading(false);
         setRefreshing(false);
-        console.log("History loading completed");
       }
     }
   }, []);
 
-  // Ekran her görünür olduğunda verileri yenileyelim
   useFocusEffect(
     useCallback(() => {
-      console.log("History screen is now focused");
-      
-      // Veri daha önce yüklendiyse, sadece güncelleme yap
       if (dataLoaded) {
         loadHistory();
       }
-      
-      return () => {
-        console.log("History screen lost focus");
-      };
     }, [loadHistory, dataLoaded])
   );
 
@@ -162,7 +135,6 @@ export default function HistoryScreen() {
     try {
       await AsyncStorage.removeItem('conversion_history');
       setHistoryItems([]);
-      console.log("History cleared");
     } catch (error) {
       console.error('Error clearing history:', error);
     }
@@ -175,7 +147,6 @@ export default function HistoryScreen() {
       const updatedItems = historyItems.filter(item => item.id !== id);
       setHistoryItems(updatedItems);
       await AsyncStorage.setItem('conversion_history', JSON.stringify(updatedItems));
-      console.log(`Removed item ${id}`);
     } catch (error) {
       console.error('Error removing item:', error);
     }
