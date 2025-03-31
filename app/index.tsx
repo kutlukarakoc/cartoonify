@@ -1,22 +1,20 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import { Redirect } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-async function preloadHistoryData() {
+// Onboarding durumunu kontrol et
+const checkOnboardingStatus = async () => {
   try {
-    await AsyncStorage.getItem('conversion_history');
-    return true;
+    const status = await AsyncStorage.getItem('onboarding_complete');
+    return status === 'true';
   } catch (error) {
-    console.error("Error preloading history data:", error);
+    console.error('Error checking onboarding status:', error);
     return false;
   }
-}
+};
 
 export default function IndexPage() {
-  useEffect(() => {
-    preloadHistoryData();
-  }, []);
-
+  // Bu sayfa sadece bir yönlendirme sayfası
+  // Ana layout'taki mantığa göre yönlendirme yapılıyor
   return <Redirect href="/(tabs)" />;
 }

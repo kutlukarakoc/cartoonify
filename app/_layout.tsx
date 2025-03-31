@@ -75,8 +75,8 @@ export default function RootLayout() {
           if (onboardingComplete === 'true') {
             router.replace('/(tabs)');
           } else {
-            AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
-            router.replace('/(tabs)');
+            // Onboarding ekranına yönlendir
+            router.replace('/onboarding');
           }
         } catch (error) {
           console.error('Error checking onboarding status:', error);
@@ -106,9 +106,23 @@ export default function RootLayout() {
             name="index"
             options={{
               title: "Cartoonify - Ghibli",
+              headerShown: false,
             }}
           />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen 
+            name="onboarding" 
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="(tabs)" 
+            options={{ 
+              headerShown: false,
+              gestureEnabled: false,
+            }} 
+          />
         </Stack>
       </SafeAreaProvider>
       <PortalHost />
