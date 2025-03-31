@@ -33,7 +33,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <ImagePlus size={size} color={color} />
           ),
-          headerTitle: 'Cartoonify',
+          headerTitle: 'Convert',
         }}
       />
       <Tabs.Screen
