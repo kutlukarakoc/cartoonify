@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, RefreshControl, BackHandler } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, RefreshControl, BackHandler } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format, parseISO } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -156,23 +156,29 @@ export default function HistoryScreen() {
     const formattedDate = format(parseISO(item.date), 'MMM dd, yyyy');
     
     return (
-      <View style={styles.card}>
-        <View style={styles.dateContainer}>
-          <Text style={styles.date}>{formattedDate}</Text>
+      <View className="bg-[#1f2937] rounded-xl p-4 mb-4 shadow-md">
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-[#9ca3af] text-sm">{formattedDate}</Text>
           <TouchableOpacity onPress={() => removeHistoryItem(item.id)}>
             <Trash2 size={18} color="#ff4d4d" />
           </TouchableOpacity>
         </View>
         
-        <View style={styles.imagesContainer}>
-          <View style={styles.imageWrapper}>
-            <Text style={styles.imageLabel}>Original</Text>
-            <Image source={{ uri: item.original }} style={styles.image} />
+        <View className="flex-row justify-between">
+          <View className="w-[48%]">
+            <Text className="text-white mb-1.5 text-lg font-medium">Original</Text>
+            <Image 
+              source={{ uri: item.original }} 
+              className="w-full h-[150px] rounded-lg bg-[#2a2a2a]" 
+            />
           </View>
           
-          <View style={styles.imageWrapper}>
-            <Text style={styles.imageLabel}>Cartoon</Text>
-            <Image source={{ uri: item.cartoon }} style={styles.image} />
+          <View className="w-[48%]">
+            <Text className="text-white mb-1.5 text-lg font-medium">Cartoon</Text>
+            <Image 
+              source={{ uri: item.cartoon }} 
+              className="w-full h-[150px] rounded-lg bg-[#2a2a2a]" 
+            />
           </View>
         </View>
       </View>
@@ -180,26 +186,25 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Conversions</Text>
-        <View style={styles.headerButtons}>
+    <SafeAreaView className="flex-1 bg-[#121212]">
+      <View className="flex-row justify-between items-center px-4 pb-3">
+        <Text className="text-lg font-bold text-white">Your Conversions</Text>
+        <View className="flex-row items-center">
           <TouchableOpacity 
             onPress={onRefresh} 
-            style={styles.refreshButton}
+            className="p-2 mr-2"
             disabled={isLoading || refreshing}
           >
             <RefreshCw size={18} color={isLoading || refreshing ? "#666" : "#6a0dad"} />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={clearHistory} 
-            style={styles.clearButton}
+            className="p-2"
             disabled={isLoading || historyItems.length === 0}
           >
-            <Text style={[
-              styles.clearButtonText, 
-              (isLoading || historyItems.length === 0) && {color: '#666'}
-            ]}>
+            <Text 
+              className={`font-semibold ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-[#6a0dad]'}`}
+            >
               Clear All
             </Text>
           </TouchableOpacity>
@@ -207,120 +212,27 @@ export default function HistoryScreen() {
       </View>
 
       {isLoading ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Loading...</Text>
+        <View className="flex-1 justify-center items-center p-6">
+          <Text className="text-xl font-bold text-white mb-2">Loading...</Text>
         </View>
       ) : historyItems.length > 0 ? (
         <FlatList
           data={historyItems}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerClassName="p-4"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#6a0dad"]} />
           }
         />
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No conversions yet</Text>
-          <Text style={styles.emptySubtext}>
+        <View className="flex-1 justify-center items-center p-6">
+          <Text className="text-xl font-bold text-white mb-2">No conversions yet</Text>
+          <Text className="text-base text-[#9ca3af] text-center">
             Images you convert will appear here
           </Text>
         </View>
       )}
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  refreshButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  clearButton: {
-    padding: 8,
-  },
-  clearButtonText: {
-    color: '#6a0dad',
-    fontWeight: '600',
-  },
-  list: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#1f2937',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  dateContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  date: {
-    color: '#9ca3af',
-    fontSize: 14,
-  },
-  imagesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  imageWrapper: {
-    width: '48%',
-  },
-  imageLabel: {
-    color: '#ffffff',
-    marginBottom: 6,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  image: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    backgroundColor: '#2a2a2a',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    color: '#9ca3af',
-    textAlign: 'center',
-  },
-}); 
+} 
