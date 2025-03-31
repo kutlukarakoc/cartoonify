@@ -3,7 +3,6 @@ import "~/global.css";
 import { DarkTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import * as React from "react";
 import { PortalHost } from "@rn-primitives/portal";
 
 const DARK_THEME: Theme = {
@@ -31,7 +30,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="index"
           options={{
-            title: "Cartoonify",
+            title: "Cartoonify - Ghibli",
             
           }}
         />
