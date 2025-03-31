@@ -73,7 +73,6 @@ export default function RootLayout() {
           if (onboardingComplete === 'true') {
             router.replace('/(tabs)');
           } else {
-            // Onboarding ekranına yönlendir
             router.replace('/onboarding');
           }
         } catch (error) {
