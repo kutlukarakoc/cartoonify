@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated, Image } from "react-native";
+import { View, Text, Animated, Image } from "react-native";
 
 export const SplashScreenComponent = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -19,7 +19,7 @@ export const SplashScreenComponent = () => {
         useNativeDriver: true,
       }),
     ]).start();
-    
+
     return () => {
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.8);
@@ -27,54 +27,26 @@ export const SplashScreenComponent = () => {
   }, []);
 
   return (
-    <View style={styles.splashContainer}>
+    <View className="flex-1 justify-center items-center bg-neutral-900">
       <Animated.View
-        style={[
-          styles.contentContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
+        className="items-center justify-center"
+        style={{
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        }}
       >
-        <Image 
-          source={require('../assets/images/icon.png')} 
-          style={styles.appIcon}
+        <Image
+          source={require("../assets/images/icon.png")}
+          className="w-32 h-32 mb-5"
           resizeMode="contain"
         />
-        <Text style={styles.splashText}>Cartoonify - Ghibli</Text>
-        <Text style={styles.subText}>Ghibli Style Transformer</Text>
+        <Text className="text-2xl font-bold text-white text-center">
+          Cartoonify - Ghibli
+        </Text>
+        <Text className="text-base text-purple-400 opacity-80">
+          Ghibli Style Transformer
+        </Text>
       </Animated.View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  splashContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-  },
-  contentContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  appIcon: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
-  },
-  splashText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subText: {
-    fontSize: 16,
-    color: "#9D86E9",
-    opacity: 0.8,
-  }
-});
