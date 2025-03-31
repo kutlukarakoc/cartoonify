@@ -28,13 +28,14 @@ export default function Screen() {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setOriginalImage(result.assets[0].uri);
+      const base64Image = result.assets[0].base64 as string;
+      setOriginalImage(`data:image/png;base64,${base64Image}`);
 
-      const cartoonImage = await cartoonifyImage(result.assets[0].uri);
-      setCartoonImage(cartoonImage);
+      await cartoonifyImage(base64Image);
     }
   };
 
@@ -45,12 +46,13 @@ export default function Screen() {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
+        base64: true,
       });
 
       if (!result.canceled) {
-        setOriginalImage(result.assets[0].uri);
-        const cartoonImage = await cartoonifyImage(result.assets[0].uri);
-        setCartoonImage(cartoonImage);
+        const base64Image = result.assets[0].base64 as string;
+        setOriginalImage(`data:image/png;base64,${base64Image}`);
+        await cartoonifyImage(base64Image);
       }
     } else {
       const { status } = await requestPermission();
@@ -60,10 +62,12 @@ export default function Screen() {
           allowsEditing: true,
           aspect: [4, 3],
           quality: 1,
+          base64: true,
         });
         if (!result.canceled) {
-          setOriginalImage(result.assets[0].uri);
-          const cartoonImage = await cartoonifyImage(result.assets[0].uri);
+          const base64Image = result.assets[0].base64 as string;
+          setOriginalImage(`data:image/png;base64,${base64Image}`);
+          const cartoonImage = await cartoonifyImage(base64Image);
           setCartoonImage(cartoonImage);
         }
       } else {
@@ -72,14 +76,34 @@ export default function Screen() {
     }
   };
 
-  async function cartoonifyImage(imageData: string): Promise<string> {
+  async function cartoonifyImage(base64: string): Promise<string> {
     setIsProcessing(true);
     setActiveTab("cartoon");
-    // Simulate processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2500));
 
-    // this would return the processed image from an AI service
-    // For demo purposes, just returning the original image
+    const response = await fetch(
+      process.env.EXPO_PUBLIC_BE_API_URL + "/api/conversion",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: base64,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error fetching cartoon image:", response);
+      setIsProcessing(false);
+      return "";
+    }
+
+    const data = await response.json();
+    const cartoonImageUri = data.data;
+    const imageData = `data:image/png;base64,${cartoonImageUri}`;
+
+    setCartoonImage(imageData);
     setIsProcessing(false);
     return imageData;
   }
