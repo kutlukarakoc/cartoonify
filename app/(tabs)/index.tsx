@@ -14,8 +14,8 @@ import { useCameraPermissions } from "expo-camera";
 import { NoImageSelected } from "~/components/NoImageSelected";
 import { CardWrapper } from "~/components/CardWrapper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from "expo-media-library";
+import * as FileSystem from "expo-file-system";
 import { Fragment } from "react";
 
 export default function ConvertScreen() {
@@ -81,6 +81,8 @@ export default function ConvertScreen() {
   };
 
   async function cartoonifyImage(base64: string): Promise<string> {
+    // add paywall check
+
     setIsProcessing(true);
     setActiveTab("cartoon");
 
@@ -109,40 +111,40 @@ export default function ConvertScreen() {
 
     setCartoonImage(imageData);
     setIsProcessing(false);
-    
+
     const originalUri = `data:image/png;base64,${base64}`;
 
     await saveToHistory(originalUri, imageData);
-    
+
     return imageData;
   }
-  
+
   const saveToHistory = async (original: string, cartoon: string) => {
     try {
-      const historyJson = await AsyncStorage.getItem('conversion_history');
-      
+      const historyJson = await AsyncStorage.getItem("conversion_history");
+
       const history = historyJson ? JSON.parse(historyJson) : [];
-      
+
       const newItem = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
         original,
-        cartoon
+        cartoon,
       };
-      
+
       const updatedHistory = [newItem, ...history];
-      
+
       const limitedHistory = updatedHistory.slice(0, 20);
-      
+
       const jsonValue = JSON.stringify(limitedHistory);
-      await AsyncStorage.setItem('conversion_history', jsonValue);
-      
-      const verifyData = await AsyncStorage.getItem('conversion_history');
+      await AsyncStorage.setItem("conversion_history", jsonValue);
+
+      const verifyData = await AsyncStorage.getItem("conversion_history");
       if (verifyData) {
         const parsedData = JSON.parse(verifyData);
       }
     } catch (error) {
-      console.error('Error saving to history:', error);
+      console.error("Error saving to history:", error);
     }
   };
 
@@ -150,38 +152,35 @@ export default function ConvertScreen() {
     if (cartoonImage) {
       try {
         const { status } = await MediaLibrary.requestPermissionsAsync();
-        
-        if (status !== 'granted') {
+
+        if (status !== "granted") {
           Alert.alert(
-            "Permission needed", 
+            "Permission needed",
             "Please grant permission to save images to your gallery",
             [{ text: "OK" }]
           );
           return;
         }
 
-        const base64Data = cartoonImage.split(',')[1];
-        
-        const fileUri = FileSystem.documentDirectory + `cartoon_${Date.now()}.png`;
-        
+        const base64Data = cartoonImage.split(",")[1];
+
+        const fileUri =
+          FileSystem.documentDirectory + `cartoon_${Date.now()}.png`;
+
         await FileSystem.writeAsStringAsync(fileUri, base64Data, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        
+
         await MediaLibrary.createAssetAsync(fileUri);
-        
-        Alert.alert(
-          "Success", 
-          "Image saved to your gallery successfully!",
-          [{ text: "OK" }]
-        );
+
+        Alert.alert("Success", "Image saved to your gallery successfully!", [
+          { text: "OK" },
+        ]);
       } catch (error) {
-        console.error('Error saving to gallery:', error);
-        Alert.alert(
-          "Error", 
-          "Failed to save image to gallery",
-          [{ text: "OK" }]
-        );
+        console.error("Error saving to gallery:", error);
+        Alert.alert("Error", "Failed to save image to gallery", [
+          { text: "OK" },
+        ]);
       }
     }
   };
@@ -260,7 +259,11 @@ export default function ConvertScreen() {
             disabled={!cartoonImage || isProcessing}
           >
             {isProcessing ? (
-              <LoaderPinwheel size={24} color="#fff" className="text-primary animate-spin" />
+              <LoaderPinwheel
+                size={24}
+                color="#fff"
+                className="text-primary animate-spin"
+              />
             ) : (
               <Fragment>
                 <Download size={16} className="text-primary" />
@@ -272,4 +275,4 @@ export default function ConvertScreen() {
       </View>
     </SafeAreaProvider>
   );
-} 
+}
