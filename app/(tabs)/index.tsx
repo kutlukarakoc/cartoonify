@@ -110,27 +110,19 @@ export default function ConvertScreen() {
     setCartoonImage(imageData);
     setIsProcessing(false);
     
-    // Burada originalImage state'i yerine doğrudan URI kullanıyoruz
     const originalUri = `data:image/png;base64,${base64}`;
-    console.log("Saving to history with original and cartoon images");
+
     await saveToHistory(originalUri, imageData);
     
     return imageData;
   }
   
-  // Save images to AsyncStorage history
   const saveToHistory = async (original: string, cartoon: string) => {
     try {
-      console.log("History save started");
-      // AsyncStorage'dan mevcut verileri oku
       const historyJson = await AsyncStorage.getItem('conversion_history');
-      console.log("Current history data:", historyJson ? "Found existing data" : "No existing data");
       
-      // JSON parse işlemi
       const history = historyJson ? JSON.parse(historyJson) : [];
-      console.log(`Current history has ${history.length} items`);
       
-      // Yeni öğe oluştur
       const newItem = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
@@ -138,25 +130,16 @@ export default function ConvertScreen() {
         cartoon
       };
       
-      // Yeni öğeyi array'in başına ekle
       const updatedHistory = [newItem, ...history];
-      console.log(`Updated history now has ${updatedHistory.length} items`);
       
-      // Limit history to 20 items to prevent storage issues
       const limitedHistory = updatedHistory.slice(0, 20);
       
-      // AsyncStorage'a kaydet
       const jsonValue = JSON.stringify(limitedHistory);
-      console.log(`Saving JSON data of length: ${jsonValue.length}`);
       await AsyncStorage.setItem('conversion_history', jsonValue);
-      console.log("History saved successfully");
       
-      // Kaydetme işlemini doğrula
       const verifyData = await AsyncStorage.getItem('conversion_history');
-      console.log(`Verification: Data exists after save: ${!!verifyData}`);
       if (verifyData) {
         const parsedData = JSON.parse(verifyData);
-        console.log(`Verification: Saved ${parsedData.length} items`);
       }
     } catch (error) {
       console.error('Error saving to history:', error);
@@ -181,15 +164,12 @@ export default function ConvertScreen() {
         
         const fileUri = FileSystem.documentDirectory + `cartoon_${Date.now()}.png`;
         
-        // Base64 veriyi dosyaya yazalım
         await FileSystem.writeAsStringAsync(fileUri, base64Data, {
           encoding: FileSystem.EncodingType.Base64,
         });
         
-        // Dosyayı medya kütüphanesine kaydedelim
         await MediaLibrary.createAssetAsync(fileUri);
         
-        // Kullanıcıya başarı mesajı gösterelim
         Alert.alert(
           "Success", 
           "Image saved to your gallery successfully!",
