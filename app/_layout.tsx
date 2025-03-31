@@ -27,24 +27,20 @@ export {
   ErrorBoundary,
 } from "expo-router";
 
-// Define a key for onboarding state
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';
 
-// Bu fonksiyon gerekli verileri önceden yükler
 async function preloadData() {
   try {
-    // History verilerini önceden yükle
     const historyJson = await AsyncStorage.getItem('conversion_history');
     console.log("Preloaded history data:", historyJson ? "Found" : "Not found");
     
-    // Onboarding durumunu kontrol et
     const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
     console.log("Onboarding status:", onboardingComplete === 'true' ? "Completed" : "Not completed");
     
     return true;
   } catch (error) {
     console.error("Error preloading data:", error);
-    return true; // Hata olsa bile devam et
+    return true;
   }
 }
 
@@ -54,20 +50,15 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Splash ekranını göster
         await SplashScreen.preventAutoHideAsync();
         
-        // Tüm verileri önceden yükle
         await preloadData();
         
-        // 2 saniye bekle - hem splash görünsün hem veriler yüklensin
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (error) {
         console.error("Error preparing app:", error);
       } finally {
-        // Uygulama hazır
         setIsReady(true);
-        // Splash ekranını gizle
         await SplashScreen.hideAsync();
       }
     }
@@ -76,24 +67,19 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    // Uygulama hazır olduğunda çalışır
     if (isReady) {
-      // Onboarding durumunu kontrol et
       const checkOnboarding = async () => {
         try {
           const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
           
-          // Onboarding tamamlandıysa tabslara git, değilse onboarding'e
           if (onboardingComplete === 'true') {
             router.replace('/(tabs)');
           } else {
-            // Onboarding yok, direkt tabslara git ve onboarding tamamlandı olarak işaretle
             AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
             router.replace('/(tabs)');
           }
         } catch (error) {
           console.error('Error checking onboarding status:', error);
-          // Hata durumunda tabs'a git
           router.replace('/(tabs)');
         }
       };
