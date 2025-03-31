@@ -4,6 +4,9 @@ import { DarkTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { PortalHost } from "@rn-primitives/portal";
+import { useEffect, useState } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { SplashScreenComponent } from "~/components/SplashScreen";
 
 const DARK_THEME: Theme = {
   ...DarkTheme,
@@ -23,15 +26,29 @@ export {
 } from "expo-router";
 
 export default function RootLayout() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      await SplashScreen.preventAutoHideAsync();
+      setIsReady(true);
+      await SplashScreen.hideAsync();
+    }
+    prepare();
+  }, []);
+
+  if (!isReady) {
+    return <SplashScreenComponent />;
+  }
+
   return (
     <ThemeProvider value={DARK_THEME}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Stack>
         <Stack.Screen
           name="index"
           options={{
             title: "Cartoonify - Ghibli",
-            
           }}
         />
       </Stack>
