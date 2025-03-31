@@ -27,6 +27,14 @@
           "photosPermission": "The app accesses your photos to let you share with AI.",
           "cameraPermission": "The app accesses your camera to let you take photos and share with AI."
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff",
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200
+        }
       ]
     ],
     "experiments": {
