@@ -221,18 +221,14 @@ export default function ConvertScreen() {
                   value="original"
                   className="flex-1 data-[state=active]:bg-[#8b7355]"
                 >
-                  <Text className="text-[#594d3f] data-[state=active]:text-[#f5e6d3]">
-                    Original
-                  </Text>
+                  <Text>Original</Text>
                 </TabsTrigger>
                 <TabsTrigger
                   value="cartoon"
                   className="flex-1 data-[state=active]:bg-[#8b7355]"
                   disabled={!originalImage}
                 >
-                  <Text className="text-[#594d3f] data-[state=active]:text-[#f5e6d3]">
-                    Anime
-                  </Text>
+                  <Text>Anime</Text>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="original">
@@ -270,7 +266,8 @@ export default function ConvertScreen() {
               {isProcessing ? (
                 <LoaderPinwheel
                   size={24}
-                  className="text-[#f5e6d3] animate-spin"
+                  color="#fff"
+                  className="animate-spin"
                 />
               ) : (
                 <Fragment>
