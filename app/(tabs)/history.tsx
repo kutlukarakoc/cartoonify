@@ -278,7 +278,7 @@ export default function HistoryScreen() {
             disabled={isLoading || historyItems.length === 0}
           >
             <Text 
-              className={`font-semibold ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-white'}`}
+              className={`font-semibold underline ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-white'}`}
             >
               Clear All
             </Text>
