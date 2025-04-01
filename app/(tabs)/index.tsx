@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { View, Image, Alert } from "react-native";
+import { View, Image, Alert, StatusBar } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -188,6 +188,7 @@ export default function ConvertScreen() {
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: "#f5e6d3" }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f5e6d3" />
         <View className="flex-1 items-center p-6">
           <View className="flex-row justify-between w-screen px-3">
             <Button
