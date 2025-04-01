@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, RefreshControl, BackHandler } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, RefreshControl, BackHandler, Alert } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format, parseISO } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Trash2, RefreshCw } from 'lucide-react-native';
+import { Trash2, RefreshCw, Download } from 'lucide-react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Skeleton } from '~/components/ui/skeleton';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 
 type ConversionItem = {
   id: string;
@@ -153,6 +155,43 @@ export default function HistoryScreen() {
     }
   };
 
+  const downloadImage = async (uri: string) => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant permission to save images to your gallery.');
+        return;
+      }
+
+      const timestamp = new Date().getTime();
+      const fileUri = `${FileSystem.documentDirectory}cartoon_${timestamp}.png`;
+
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const base64Data = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      const base64String = base64Data.split(',')[1];
+
+      await FileSystem.writeAsStringAsync(fileUri, base64String, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      await MediaLibrary.createAssetAsync(fileUri);
+      
+      Alert.alert('Success', 'Image saved to your gallery!');
+    } catch (error) {
+      console.error('Detailed error in downloadImage:', error);
+      Alert.alert(
+        'Error', 
+        'Failed to download image. Please check your internet connection and try again.'
+      );
+    }
+  };
+
   const renderItem = ({ item }: { item: ConversionItem }) => {
     const formattedDate = format(parseISO(item.date), 'MMM dd, yyyy');
     
@@ -160,9 +199,17 @@ export default function HistoryScreen() {
       <View className="bg-[#1f2937] rounded-xl p-4 mb-4 shadow-md">
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-[#9ca3af] text-sm">{formattedDate}</Text>
-          <TouchableOpacity onPress={() => removeHistoryItem(item.id)}>
-            <Trash2 size={18} color="#ff4d4d" />
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <TouchableOpacity 
+              onPress={() => downloadImage(item.cartoon)}
+              className="p-2 mr-2"
+            >
+              <Download size={18} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => removeHistoryItem(item.id)}>
+              <Trash2 size={18} color="#ff4d4d" />
+            </TouchableOpacity>
+          </View>
         </View>
         
         <View className="flex-row justify-between">
@@ -223,7 +270,7 @@ export default function HistoryScreen() {
             className="p-2 mr-2"
             disabled={isLoading || refreshing}
           >
-            <RefreshCw size={18} color={isLoading || refreshing ? "#666" : "#6a0dad"} />
+            <RefreshCw size={18} color={isLoading || refreshing ? "#666" : "#fff"} />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={clearHistory} 
@@ -231,7 +278,7 @@ export default function HistoryScreen() {
             disabled={isLoading || historyItems.length === 0}
           >
             <Text 
-              className={`font-semibold ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-[#6a0dad]'}`}
+              className={`font-semibold ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-white'}`}
             >
               Clear All
             </Text>
