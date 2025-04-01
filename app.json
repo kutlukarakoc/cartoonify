@@ -13,7 +13,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cartoonify.app"
+      "bundleIdentifier": "com.cartoonify.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-router",
@@ -27,6 +30,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "710860ae-3fd4-47dc-8ff1-0544a8c5ee20"
+      }
     }
   }
 }
