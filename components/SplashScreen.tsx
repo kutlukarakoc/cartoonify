@@ -41,10 +41,10 @@ export const SplashScreenComponent = () => {
           resizeMode="contain"
         />
         <Text className="text-2xl font-bold text-white text-center">
-          Cartoonify - Ghibli
+          Ghiblify - Anime Generator
         </Text>
         <Text className="text-base text-purple-400 opacity-80">
-          Ghibli Style Transformer
+          Anime Style Transformer
         </Text>
       </Animated.View>
     </View>

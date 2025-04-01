@@ -174,7 +174,7 @@ export default function HistoryScreen() {
           </View>
           
           <View className="w-[48%]">
-            <Text className="text-white mb-1.5 text-lg font-medium">Cartoon</Text>
+            <Text className="text-white mb-1.5 text-lg font-medium">Anime</Text>
             <Image 
               source={{ uri: item.cartoon }} 
               className="w-full h-[150px] rounded-lg bg-[#2a2a2a]" 

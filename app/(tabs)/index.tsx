@@ -267,7 +267,7 @@ export default function ConvertScreen() {
             ) : (
               <Fragment>
                 <Download size={16} className="text-primary" />
-                <Text className="text-primary">Save Cartoon</Text>
+                <Text className="text-primary">Save Anime</Text>
               </Fragment>
             )}
           </Button>
