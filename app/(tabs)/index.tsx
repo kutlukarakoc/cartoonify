@@ -223,7 +223,7 @@ export default function ConvertScreen() {
                 className="flex-1"
                 disabled={!originalImage}
               >
-                <Text>Cartoon</Text>
+                <Text>Anime</Text>
               </TabsTrigger>
             </TabsList>
             <TabsContent value="original">
