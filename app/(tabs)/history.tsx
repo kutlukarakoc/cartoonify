@@ -195,36 +195,36 @@ export default function HistoryScreen() {
     const formattedDate = format(parseISO(item.date), 'MMM dd, yyyy');
     
     return (
-      <View className="bg-[#1f2937] rounded-xl p-4 mb-4 shadow-md">
+      <View className="bg-[#e6d5c3] rounded-xl p-4 mb-4 shadow-md">
         <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-[#9ca3af] text-sm">{formattedDate}</Text>
+          <Text className="text-[#594d3f] text-sm">{formattedDate}</Text>
           <View className="flex-row items-center">
             <TouchableOpacity 
               onPress={() => downloadImage(item.cartoon)}
               className="p-2 mr-2"
             >
-              <Download size={18} color="#fff" />
+              <Download size={18} color="#8b7355" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => removeHistoryItem(item.id)}>
-              <Trash2 size={18} color="#ff4d4d" />
+              <Trash2 size={18} color="#c14747" />
             </TouchableOpacity>
           </View>
         </View>
         
         <View className="flex-row justify-between">
           <View className="w-[48%]">
-            <Text className="text-white mb-1.5 text-lg font-medium">Original</Text>
+            <Text className="text-[#594d3f] mb-1.5 text-lg font-medium">Original</Text>
             <Image 
               source={{ uri: item.original }} 
-              className="w-full h-[150px] rounded-lg bg-[#2a2a2a]" 
+              className="w-full h-[150px] rounded-lg bg-[#d4c3b0]" 
             />
           </View>
           
           <View className="w-[48%]">
-            <Text className="text-white mb-1.5 text-lg font-medium">Anime</Text>
+            <Text className="text-[#594d3f] mb-1.5 text-lg font-medium">Anime</Text>
             <Image 
               source={{ uri: item.cartoon }} 
-              className="w-full h-[150px] rounded-lg bg-[#2a2a2a]" 
+              className="w-full h-[150px] rounded-lg bg-[#d4c3b0]" 
             />
           </View>
         </View>
@@ -236,21 +236,21 @@ export default function HistoryScreen() {
     return (
       <View className="p-4">
         {[1, 2, 3].map((index) => (
-          <View key={index} className="bg-[#1f2937] rounded-xl p-4 mb-4 shadow-md">
+          <View key={index} className="bg-[#e6d5c3] rounded-xl p-4 mb-4 shadow-md">
             <View className="flex-row justify-between items-center mb-3">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-24 bg-[#d4c3b0]" />
+              <Skeleton className="h-4 w-4 bg-[#d4c3b0]" />
             </View>
             
             <View className="flex-row justify-between">
               <View className="w-[48%]">
-                <Skeleton className="h-6 w-20 mb-1.5" />
-                <Skeleton className="w-full h-[150px] rounded-lg" />
+                <Skeleton className="h-6 w-20 mb-1.5 bg-[#d4c3b0]" />
+                <Skeleton className="w-full h-[150px] rounded-lg bg-[#d4c3b0]" />
               </View>
               
               <View className="w-[48%]">
-                <Skeleton className="h-6 w-20 mb-1.5" />
-                <Skeleton className="w-full h-[150px] rounded-lg" />
+                <Skeleton className="h-6 w-20 mb-1.5 bg-[#d4c3b0]" />
+                <Skeleton className="w-full h-[150px] rounded-lg bg-[#d4c3b0]" />
               </View>
             </View>
           </View>
@@ -260,24 +260,24 @@ export default function HistoryScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#f5e6d3]">
       <View 
-        className="flex-row justify-between items-center px-4 bg-[#121212]"
+        className="flex-row justify-between items-center px-4 bg-[#f5e6d3]"
         style={{
           paddingTop: 60,
           paddingBottom: 12,
           borderBottomWidth: 1,
-          borderBottomColor: '#1f2937'
+          borderBottomColor: '#e6d5c3'
         }}
       >
-        <Text className="text-lg font-bold text-white">Your Conversions</Text>
+        <Text className="text-lg font-bold text-[#594d3f]">Your Conversions</Text>
         <View className="flex-row items-center">
           <TouchableOpacity 
             onPress={onRefresh} 
             className="p-2 mr-2"
             disabled={isLoading || refreshing}
           >
-            <RefreshCw size={18} color={isLoading || refreshing ? "#666" : "#fff"} />
+            <RefreshCw size={18} color={isLoading || refreshing ? "#a39485" : "#8b7355"} />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={clearHistory} 
@@ -285,7 +285,7 @@ export default function HistoryScreen() {
             disabled={isLoading || historyItems.length === 0}
           >
             <Text 
-              className={`font-semibold underline ${isLoading || historyItems.length === 0 ? 'text-[#666]' : 'text-white'}`}
+              className={`font-semibold ${isLoading || historyItems.length === 0 ? 'text-[#a39485]' : 'text-[#8b7355]'}`}
             >
               Clear All
             </Text>
@@ -302,13 +302,18 @@ export default function HistoryScreen() {
           keyExtractor={(item) => item.id}
           contentContainerClassName="p-4"
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#6a0dad"]} />
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              colors={["#8b7355"]}
+              progressBackgroundColor="#e6d5c3"
+            />
           }
         />
       ) : (
         <View className="flex-1 justify-center items-center p-6">
-          <Text className="text-xl font-bold text-white mb-2">No conversions yet</Text>
-          <Text className="text-base text-[#9ca3af] text-center">
+          <Text className="text-xl font-bold text-[#594d3f] mb-2">No conversions yet</Text>
+          <Text className="text-base text-[#8b7355] text-center">
             Images you convert will appear here
           </Text>
         </View>

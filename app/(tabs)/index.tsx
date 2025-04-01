@@ -187,90 +187,98 @@ export default function ConvertScreen() {
 
   return (
     <SafeAreaProvider>
-      <View className="flex-1 items-center p-6 bg-secondary/30">
-        <View className="flex-row justify-between w-screen px-3">
-          <Button
-            variant="outline"
-            className="bg-purple-700 flex-row items-center gap-2 active:bg-purple-800"
-            onPress={pickImage}
-          >
-            <Upload size={16} className="text-primary" />
-            <Text className="text-primary">Select Image</Text>
-          </Button>
+      <View style={{ flex: 1, backgroundColor: "#f5e6d3" }}>
+        <View className="flex-1 items-center p-6">
+          <View className="flex-row justify-between w-screen px-3">
+            <Button
+              variant="default"
+              className="flex-row items-center gap-2 bg-[#8b7355] active:bg-[#594d3f]"
+              onPress={pickImage}
+            >
+              <Upload size={16} className="text-[#f5e6d3]" />
+              <Text className="text-[#f5e6d3]">Select Image</Text>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="bg-purple-700 active:bg-purple-800 flex-row items-center gap-2"
-            onPress={takePhoto}
-          >
-            <Camera size={16} className="text-primary" />
-            <Text className="text-primary">Take a Photo</Text>
-          </Button>
-        </View>
+            <Button
+              variant="default"
+              className="flex-row items-center gap-2 bg-[#8b7355] active:bg-[#594d3f]"
+              onPress={takePhoto}
+            >
+              <Camera size={16} className="text-[#f5e6d3]" />
+              <Text className="text-[#f5e6d3]">Take a Photo</Text>
+            </Button>
+          </View>
 
-        <View className="justify-center p-6">
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full max-w-[400px] mx-auto flex-col gap-1.5"
-          >
-            <TabsList className="flex-row w-full mb-3">
-              <TabsTrigger value="original" className="flex-1">
-                <Text>Original</Text>
-              </TabsTrigger>
-              <TabsTrigger
-                value="cartoon"
-                className="flex-1"
-                disabled={!originalImage}
-              >
-                <Text>Anime</Text>
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="original">
-              <CardWrapper>
-                {originalImage ? (
-                  <Image
-                    source={{ uri: originalImage }}
-                    className="w-full h-full rounded-md"
-                  />
-                ) : (
-                  <NoImageSelected />
-                )}
-              </CardWrapper>
-            </TabsContent>
-            <TabsContent value="cartoon">
-              <CardWrapper>
-                {!cartoonImage || isProcessing ? (
-                  <Skeleton className="h-full w-full rounded-md" />
-                ) : (
-                  <Image
-                    source={{ uri: cartoonImage }}
-                    className="w-full h-full rounded-md"
-                  />
-                )}
-              </CardWrapper>
-            </TabsContent>
-          </Tabs>
+          <View className="justify-center p-6">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full max-w-[400px] mx-auto flex-col gap-1.5"
+            >
+              <TabsList className="flex-row w-full mb-3 bg-[#e6d5c3] border border-[#8b7355]">
+                <TabsTrigger
+                  value="original"
+                  className="flex-1 data-[state=active]:bg-[#8b7355]"
+                >
+                  <Text className="text-[#594d3f] data-[state=active]:text-[#f5e6d3]">
+                    Original
+                  </Text>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="cartoon"
+                  className="flex-1 data-[state=active]:bg-[#8b7355]"
+                  disabled={!originalImage}
+                >
+                  <Text className="text-[#594d3f] data-[state=active]:text-[#f5e6d3]">
+                    Anime
+                  </Text>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="original">
+                <CardWrapper>
+                  {originalImage ? (
+                    <Image
+                      source={{ uri: originalImage }}
+                      className="w-full h-full rounded-md"
+                    />
+                  ) : (
+                    <NoImageSelected />
+                  )}
+                </CardWrapper>
+              </TabsContent>
+              <TabsContent value="cartoon">
+                <CardWrapper>
+                  {!cartoonImage || isProcessing ? (
+                    <Skeleton className="h-full w-full rounded-md bg-[#d4c3b0]" />
+                  ) : (
+                    <Image
+                      source={{ uri: cartoonImage }}
+                      className="w-full h-full rounded-md"
+                    />
+                  )}
+                </CardWrapper>
+              </TabsContent>
+            </Tabs>
 
-          <Button
-            variant="outline"
-            className="bg-purple-700 active:bg-purple-800 flex-row items-center gap-2 -mt-20"
-            onPress={saveImageToGallery}
-            disabled={!cartoonImage || isProcessing}
-          >
-            {isProcessing ? (
-              <LoaderPinwheel
-                size={24}
-                color="#fff"
-                className="text-primary animate-spin"
-              />
-            ) : (
-              <Fragment>
-                <Download size={16} className="text-primary" />
-                <Text className="text-primary">Save Anime</Text>
-              </Fragment>
-            )}
-          </Button>
+            <Button
+              variant="default"
+              className="flex-row items-center gap-2 mt-4 bg-[#8b7355] active:bg-[#594d3f]"
+              onPress={saveImageToGallery}
+              disabled={!cartoonImage || isProcessing}
+            >
+              {isProcessing ? (
+                <LoaderPinwheel
+                  size={24}
+                  className="text-[#f5e6d3] animate-spin"
+                />
+              ) : (
+                <Fragment>
+                  <Download size={16} className="text-[#f5e6d3]" />
+                  <Text className="text-[#f5e6d3]">Save Anime</Text>
+                </Fragment>
+              )}
+            </Button>
+          </View>
         </View>
       </View>
     </SafeAreaProvider>
