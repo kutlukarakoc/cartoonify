@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, RefreshControl, BackHandler, Alert } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format, parseISO } from 'date-fns';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Trash2, RefreshCw, Download } from 'lucide-react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Skeleton } from '~/components/ui/skeleton';
@@ -261,8 +260,16 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#121212]">
-      <View className="flex-row justify-between items-center px-4 pb-3">
+    <View className="flex-1 bg-[#121212]">
+      <View 
+        className="flex-row justify-between items-center px-4 bg-[#121212]"
+        style={{
+          paddingTop: 60,
+          paddingBottom: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: '#1f2937'
+        }}
+      >
         <Text className="text-lg font-bold text-white">Your Conversions</Text>
         <View className="flex-row items-center">
           <TouchableOpacity 
@@ -306,6 +313,6 @@ export default function HistoryScreen() {
           </Text>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 } 
