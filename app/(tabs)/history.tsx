@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Trash2, RefreshCw } from 'lucide-react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { Skeleton } from '~/components/ui/skeleton';
 
 type ConversionItem = {
   id: string;
@@ -185,6 +186,33 @@ export default function HistoryScreen() {
     );
   };
 
+  const HistorySkeleton = () => {
+    return (
+      <View className="p-4">
+        {[1, 2, 3].map((index) => (
+          <View key={index} className="bg-[#1f2937] rounded-xl p-4 mb-4 shadow-md">
+            <View className="flex-row justify-between items-center mb-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-4" />
+            </View>
+            
+            <View className="flex-row justify-between">
+              <View className="w-[48%]">
+                <Skeleton className="h-6 w-20 mb-1.5" />
+                <Skeleton className="w-full h-[150px] rounded-lg" />
+              </View>
+              
+              <View className="w-[48%]">
+                <Skeleton className="h-6 w-20 mb-1.5" />
+                <Skeleton className="w-full h-[150px] rounded-lg" />
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-[#121212]">
       <View className="flex-row justify-between items-center px-4 pb-3">
@@ -212,9 +240,7 @@ export default function HistoryScreen() {
       </View>
 
       {isLoading ? (
-        <View className="flex-1 justify-center items-center p-6">
-          <Text className="text-xl font-bold text-white mb-2">Loading...</Text>
-        </View>
+        <HistorySkeleton />
       ) : historyItems.length > 0 ? (
         <FlatList
           data={historyItems}
