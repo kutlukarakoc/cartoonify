@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Ghiblify - Anime Generator",
-    "slug": "ghiblify",
+    "slug": "cartoonify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,7 +13,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ghiblify.app",
+      "bundleIdentifier": "com.cartoonify.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
